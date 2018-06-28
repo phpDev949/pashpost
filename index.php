@@ -2,7 +2,8 @@
 
 $prefix[0] = '+ * * 22 26 53 + * 66 8 + + * * * 7 76 25 44 78 100';
 $prefix[1] = '+ + + 27 38 81 + * * 48 33 53 + * 91 53 + * 82 14 96';
-$prefix[2] = '+ 57 + * 14 71 + * * 86 39 24 + * 48 3 * * 92 16 60';
+$prefix[2] = '- 93 - / 10 7 - + + + / / / 66 50 10 32 35 33 12 4';
+$prefix[3] = '+ 57 + * 14 71 + * * 86 39 24 + * 48 3 * * 92 16 60';
 
 for ($i=0;$i<count($prefix);$i++) {
   $parser = new PrefixParser($prefix[$i]);
@@ -15,6 +16,7 @@ for ($i=0;$i<count($prefix);$i++) {
 *
 *      (((22 * 26) * 53) + ((66 * 8) + (((((7 * 76) * 25) * 44) + 78) + 100))) = 616222
 *      (((27 + 38) + 81) + (((48 * 33) * 53) + ((91 * 53) + ((82 * 14) + 96)))) = 90165
+* .    (93 - ((10 / 7) - (((((((66 / 50) / 10) / 32) + 35) + 33) + 12) - 4))) = 167.57555357143
 *      (57 + ((14 * 71) + (((86 * 39) * 24) + ((48 * 3) + ((92 * 16) * 60))))) = 170011
 */
 
@@ -34,7 +36,7 @@ class PrefixParser extends IteratorIterator
     {
         $string = parent::current();
         parent::next();
-        $operators = array('*' => 'Mult', '+' => 'Plus');
+        $operators = array('*' => 'Mult', '/' => 'Divide', '+' => 'Plus', '-' => 'Minus');
         $class = 'PrefixNode' . (isset($operators[$string]) ? 'Operator' . $operators[$string] : 'Value');
         $node = new $class($string);
         if ($node instanceof PrefixNodeOperator) {
@@ -105,11 +107,27 @@ class PrefixNodeOperatorMult extends PrefixNodeOperator
     }
 }
 
+class PrefixNodeOperatorDivide extends PrefixNodeOperator
+{
+    public function evaluate()
+    {
+        return $this->left->evaluate() / $this->right->evaluate();
+    }
+}
+
 class PrefixNodeOperatorPlus extends PrefixNodeOperator
 {
     public function evaluate()
     {
         return $this->left->evaluate() + $this->right->evaluate();
+    }
+}
+
+class PrefixNodeOperatorMinus extends PrefixNodeOperator
+{
+    public function evaluate()
+    {
+        return $this->left->evaluate() - $this->right->evaluate();
     }
 }
 
